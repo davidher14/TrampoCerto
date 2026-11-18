@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: trampocerto
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:////tmp/trampocerto.db
+      - key: UPLOAD_DIRECTORY
+        value: /tmp/trampocerto-uploads
+      - key: JWT_SECRET_KEY
+        generateValue: true

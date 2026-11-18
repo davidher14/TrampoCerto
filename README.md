@@ -260,3 +260,9 @@ Para publicar uma vaga, o corpo de `POST /companies/jobs` exige `salary_min` pos
 Por padrão, o Docker Compose publica os serviços somente em `127.0.0.1`; portanto, a aplicação fica acessível apenas no próprio computador. Para compartilhar o acesso com amigos, prefira uma rede privada ou VPN e restrinja o acesso às pessoas convidadas. Não exponha diretamente as portas do MySQL (`3306`), da API (`8000`) ou do Vite (`5173`) à internet.
 
 Antes de hospedar a aplicação em qualquer servidor, substitua todos os segredos e senhas de demonstração, configure HTTPS e CORS para o domínio correto, planeje backups dos dados e dos arquivos enviados e não execute o seed em uma instância com dados reais. O armazenamento de arquivos atual é local e adequado para desenvolvimento ou uma instância única; uma implantação escalável exige armazenamento compartilhado ou um serviço de objetos.
+
+### Demonstração gratuita no Render
+
+O arquivo [`render.yaml`](./render.yaml) configura um único serviço Docker gratuito para servir o front-end e a API no mesmo endereço. Ele usa SQLite e armazenamento temporários para evitar serviços pagos na demonstração. Importe o repositório `davidher14/TrampoCerto` no Render e selecione o Blueprint existente; o Render cria o serviço a partir dessa configuração.
+
+O plano gratuito pode suspender o serviço após 15 minutos sem tráfego e leva cerca de um minuto para voltar. O sistema usa então um banco SQLite em disco efêmero: reinícios, suspensão ou novos deploys podem apagar contas, vagas, candidaturas e arquivos enviados. O serviço gratuito não é apropriado para dados reais nem para uso confiável. O repositório continua usando MySQL no Docker Compose local; a configuração SQLite se aplica somente ao Blueprint de demonstração.
