@@ -1,0 +1,16 @@
+.env
+/uploads/
+*.sqlite
+*.sqlite3
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+backend/alembic/versions/__pycache__/
+backend/uploads/
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo

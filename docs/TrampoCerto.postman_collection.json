@@ -1,0 +1,280 @@
+{
+  "info": {
+    "_postman_id": "b86c7274-476e-42d7-a121-899b013a0449",
+    "name": "TrampoCerto — fluxo de demonstração",
+    "description": "Fluxo local da empresa e do candidato. Execute o seed, mantenha a ordem das requisições e use as credenciais fictícias apenas em desenvolvimento.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api/v1"
+    },
+    {
+      "key": "companyEmail",
+      "value": "empresa@trampocerto.example.com"
+    },
+    {
+      "key": "companyPassword",
+      "value": "Empresa12345"
+    },
+    {
+      "key": "candidateEmail",
+      "value": "candidato@trampocerto.example.com"
+    },
+    {
+      "key": "candidatePassword",
+      "value": "Candidato12345"
+    },
+    {
+      "key": "companyAccessToken",
+      "value": ""
+    },
+    {
+      "key": "candidateAccessToken",
+      "value": ""
+    },
+    {
+      "key": "jobId",
+      "value": ""
+    },
+    {
+      "key": "applicationId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 — Entrar como empresa",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{companyEmail}}\",\n  \"password\": \"{{companyPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login",
+        "description": "Autentica a empresa criada pelo seed e guarda o access token."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login da empresa retorna sucesso', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set('companyAccessToken', pm.response.json().access_token);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 — Publicar vaga com salário",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{companyAccessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Pessoa desenvolvedora de demonstração\",\n  \"description\": \"Vaga criada pela coleção de testes do TrampoCerto.\",\n  \"requirements\": \"Conhecimento de APIs REST e colaboração em equipe.\",\n  \"area\": \"Tecnologia\",\n  \"city\": \"Curitiba\",\n  \"state\": \"PR\",\n  \"work_mode\": \"remote\",\n  \"contract_type\": \"clt\",\n  \"salary_min\": 5000,\n  \"salary_max\": 7000,\n  \"status\": \"open\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/companies/jobs",
+        "description": "Cria uma vaga publicada com remuneração obrigatória e guarda seu ID."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Vaga criada', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "if (pm.response.code === 201) {",
+              "    pm.collectionVariables.set('jobId', pm.response.json().id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 — Entrar como candidato",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{candidateEmail}}\",\n  \"password\": \"{{candidatePassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/auth/login",
+        "description": "Autentica o candidato criado pelo seed e guarda o access token."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login do candidato retorna sucesso', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "if (pm.response.code === 200) {",
+              "    pm.collectionVariables.set('candidateAccessToken', pm.response.json().access_token);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 — Candidatar-se à vaga",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{candidateAccessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cover_letter\": \"Tenho interesse nesta oportunidade e experiência com APIs.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/jobs/{{jobId}}/applications",
+        "description": "Cria uma candidatura e guarda o ID para o retorno da empresa. Uma nova execução na mesma vaga responde com conflito por candidatura duplicada."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Candidatura criada', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "if (pm.response.code === 201) {",
+              "    pm.collectionVariables.set('applicationId', pm.response.json().id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 — Registrar retorno",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{companyAccessToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"interview\",\n  \"message\": \"Seu perfil foi selecionado para a etapa de entrevista.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/companies/applications/{{applicationId}}/feedback",
+        "description": "Registra uma atualização obrigatória antes do encerramento da vaga."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Retorno registrado', function () {",
+              "    pm.response.to.have.status(201);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 — Encerrar vaga após retorno",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{companyAccessToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/companies/jobs/{{jobId}}/close",
+        "description": "Encerra a vaga somente depois de todas as candidaturas receberem retorno."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Vaga encerrada com sucesso', function () {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json().status).to.eql('closed');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
